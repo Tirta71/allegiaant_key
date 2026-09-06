@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AllegiaantHub — Get Key</title>
+<style>
+  :root{
+    --bg:#14161a; --card:#1b1f27; --row:#232833; --stroke:#333a47;
+    --acc:#f5c82d; --acc-d:#d8ae1e; --green:#5ac878; --txt:#e8ebf0; --txt2:#9aa3b2;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%,#1e2430 0,transparent 60%),var(--bg);
+    color:var(--txt); font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;min-height:100vh;
+  }
+  .card{
+    width:100%;max-width:400px;background:var(--card);border:1px solid var(--stroke);
+    border-radius:16px;padding:26px 24px;box-shadow:0 20px 60px rgba(0,0,0,.45);text-align:center;
+  }
+  .logo{width:56px;height:56px;margin:0 auto 12px;border-radius:14px;background:var(--row);
+    border:1px solid var(--stroke);display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .logo img{width:100%;height:100%;object-fit:contain}
+  .logo span{font-size:26px}
+  h1{margin:0 0 4px;font-size:22px;font-weight:800;letter-spacing:.3px}
+  h1 em{color:var(--acc);font-style:normal}
+  .sub{color:var(--txt2);margin:0 0 20px;font-size:13px}
+  .steps{text-align:left;display:flex;flex-direction:column;gap:10px;margin-bottom:22px}
+  .step{display:flex;gap:12px;align-items:center;background:var(--row);border:1px solid var(--stroke);
+    border-radius:10px;padding:10px 12px}
+  .num{flex:0 0 26px;height:26px;border-radius:50%;background:var(--acc);color:#1a1a1a;font-weight:800;
+    display:flex;align-items:center;justify-content:center;font-size:13px}
+  .step strong{display:block;font-size:13.5px}
+  .step small{color:var(--txt2);font-size:11.5px}
+  .btn{width:100%;border:0;border-radius:11px;padding:14px;font-weight:800;font-size:15px;cursor:pointer;
+    background:var(--acc);color:#1a1a1a;transition:.15s;margin-top:2px}
+  .btn:hover{background:var(--acc-d)}
+  .btn:disabled{opacity:.6;cursor:default}
+  .note{color:var(--txt2);font-size:11.5px;margin:14px 0 0}
+  .foot{color:#5b6472;font-size:11px;margin-top:16px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo" id="logo"><span>🌿</span></div>
+    <h1>Allegiaant<em>Hub</em></h1>
+    <p class="sub">Ambil key gratis buat jalanin hub</p>
+
+    <div class="steps">
+      <div class="step"><span class="num">1</span><div><strong>Tekan Get Key</strong><small>Selesaiin task singkat dari sponsor</small></div></div>
+      <div class="step"><span class="num">2</span><div><strong>Key muncul otomatis</strong><small>Berlaku 24 jam · 1 device</small></div></div>
+      <div class="step"><span class="num">3</span><div><strong>Paste di hub</strong><small>Tempel key di GUI pas jalanin loader</small></div></div>
+    </div>
+
+    <button class="btn" id="go">🔑 Get Key (24 jam)</button>
+    <p class="note">Key kekunci ke 1 device. Ganti device? Ambil key baru di sini lagi.</p>
+  </div>
+  <div class="foot">© AllegiaantHub</div>
+
+<script>
+  // ==== KONFIG ====
+  var API_BASE = "https://api.allegiaant.my.id";
+  var LOOT_URL = "https://links.lootlabs.gg/s?uP7uWpw4"; // link Lootlabs asli (domain canonical, tanpa hop redirect)
+  var CLAIM_BASE = "https://key.allegiaant.my.id/claim";
+  var CLAIM_STORAGE = "alg_claim_id";
+
+  function qs(k){ try{ return new URLSearchParams(location.search).get(k)||""; }catch(e){ return ""; } }
+  function newNonce(){
+    try{ if(crypto && crypto.randomUUID) return "u_"+crypto.randomUUID().replace(/-/g,""); }catch(e){}
+    return "u_"+Date.now().toString(36)+Math.random().toString(36).slice(2,10);
+  }
+
+  // ID device: utamakan HWID dari URL (dikirim loader hub). Kalau ga ada (buka manual),
+  // pakai nonce browser yg disimpan biar tetap jalan. Id ini = penanda per-device.
+  function resolveDeviceId(){
+    var h = qs("hwid").trim();
+    if(h && h.indexOf("{")<0) return h;
+    var n=""; try{ n=localStorage.getItem(CLAIM_STORAGE)||""; }catch(e){}
+    if(!n){ n=newNonce(); }
+    return n;
+  }
+  var DID = resolveDeviceId();
+  try{ localStorage.setItem(CLAIM_STORAGE, DID); }catch(e){}
+
+  function claimUrl(){ return CLAIM_BASE + "?hwid=" + encodeURIComponent(DID); }
+  function lootUrl(){
+    if(!LOOT_URL) return "";
+    var sep = LOOT_URL.indexOf("?")>=0 ? "&" : "?";
+    return LOOT_URL + sep + "puid=" + encodeURIComponent(DID); // puid -> click_id (=HWID) di postback
+  }
+
+  var goBtn = document.getElementById("go");
+  // Cek device: kalau udah punya key AKTIF -> skip task, langsung ke /claim.
+  (function(){
+    goBtn.disabled = true; goBtn.textContent = "Mengecek device…";
+    fetch(API_BASE + "/api/lootlabs/device?hwid=" + encodeURIComponent(DID), {cache:"no-store"})
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if(j && j.hasActive){ window.location.href = claimUrl(); return; }
+        goBtn.disabled = false; goBtn.textContent = "🔑 Get Key (24 jam)";
+      })
+      .catch(function(){ goBtn.disabled = false; goBtn.textContent = "🔑 Get Key (24 jam)"; });
+  })();
+
+  var going=false;
+  goBtn.addEventListener("click", function(){
+    if(going || this.disabled || !LOOT_URL) return;
+    going=true; this.disabled=true; this.textContent="Membuka…";
+    window.location.href = lootUrl();
+  });
+
+  // logo dari API (opsional)
+  (function(){
+    var img=new Image();
+    img.onload=function(){ var l=document.getElementById("logo"); l.innerHTML=""; l.appendChild(img); };
+    img.onerror=function(){};
+    img.src="/logo.png";
+  })();
+</script>
+</body>
+</html>
