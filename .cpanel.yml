@@ -1,0 +1,7 @@
+---
+deployment:
+  tasks:
+    - /bin/mkdir -p /home/allk1369/public_html/key.allegiaant.my.id/claim
+    - /bin/cp -f /home/allk1369/repositories/allegiaant_key/index.html /home/allk1369/public_html/key.allegiaant.my.id/index.html
+    - /bin/cp -f /home/allk1369/repositories/allegiaant_key/claim/index.html /home/allk1369/public_html/key.allegiaant.my.id/claim/index.html
+    - /bin/cp -f /home/allk1369/repositories/allegiaant_key/logo.png /home/allk1369/public_html/key.allegiaant.my.id/logo.png
