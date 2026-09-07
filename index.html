@@ -85,10 +85,20 @@
   try{ localStorage.setItem(CLAIM_STORAGE, DID); }catch(e){}
 
   function claimUrl(){ return CLAIM_BASE + "?hwid=" + encodeURIComponent(DID); }
-  function lootUrl(){
+  // Fallback link statis (kalau /start gagal). Anti-bypass ON bisa bikin ini blank,
+  // makanya defaultnya minta link terenkripsi ke server dulu.
+  function lootUrlStatic(){
     if(!LOOT_URL) return "";
     var sep = LOOT_URL.indexOf("?")>=0 ? "&" : "?";
-    return LOOT_URL + sep + "puid=" + encodeURIComponent(DID); // puid -> click_id (=HWID) di postback
+    return LOOT_URL + sep + "puid=" + encodeURIComponent(DID);
+  }
+  // Link Lootlabs terenkripsi (Redirect API / anti-bypass). Server yg pegang api_token
+  // & susun &data; tahan banting walau anti-bypass aktif. Fallback ke statis kalau gagal.
+  function fetchLootUrl(){
+    return fetch(API_BASE + "/api/lootlabs/start?hwid=" + encodeURIComponent(DID), {cache:"no-store"})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ return (j && j.ok && j.url) ? j.url : lootUrlStatic(); })
+      .catch(function(){ return lootUrlStatic(); });
   }
 
   var goBtn = document.getElementById("go");
@@ -106,9 +116,12 @@
 
   var going=false;
   goBtn.addEventListener("click", function(){
-    if(going || this.disabled || !LOOT_URL) return;
+    if(going || this.disabled) return;
     going=true; this.disabled=true; this.textContent="Membuka…";
-    window.location.href = lootUrl();
+    fetchLootUrl().then(function(url){
+      if(!url){ going=false; goBtn.disabled=false; goBtn.textContent="🔑 Get Key (24 jam)"; return; }
+      window.location.href = url;
+    });
   });
 
   // logo dari API (opsional)
