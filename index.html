@@ -50,20 +50,20 @@
 
     <div class="steps">
       <div class="step"><span class="num">1</span><div><strong>Tekan Get Key</strong><small>Selesaiin task singkat dari sponsor</small></div></div>
-      <div class="step"><span class="num">2</span><div><strong>Key muncul otomatis</strong><small>Berlaku 24 jam · 1 device</small></div></div>
+      <div class="step"><span class="num">2</span><div><strong>Key muncul otomatis</strong><small>Berlaku 12 jam · 1 device</small></div></div>
       <div class="step"><span class="num">3</span><div><strong>Paste di hub</strong><small>Tempel key di GUI pas jalanin loader</small></div></div>
     </div>
 
-    <button class="btn" id="go">🔑 Get Key (24 jam)</button>
+    <button class="btn" id="go">🔑 Get Key (12 jam)</button>
     <p class="note">Key kekunci ke 1 device. Ganti device? Ambil key baru di sini lagi.</p>
   </div>
   <div class="foot">© AllegiaantHub</div>
 
 <script>
   // ==== KONFIG ====
-  var API_BASE = "https://api.allegiaant.my.id";
+  var API_BASE = "https://allegiaant.net";
   var LOOT_URL = "https://links.lootlabs.gg/s?oiJxh40W"; // fallback kalau /start gagal (utama: link terenkripsi dari server)
-  var CLAIM_BASE = "https://key.allegiaant.my.id/claim";
+  var CLAIM_BASE = "https://key.allegiaant.net/claim";
   var CLAIM_STORAGE = "alg_claim_id";
 
   function qs(k){ try{ return new URLSearchParams(location.search).get(k)||""; }catch(e){ return ""; } }
@@ -109,9 +109,9 @@
       .then(function(r){ return r.json(); })
       .then(function(j){
         if(j && j.hasActive){ window.location.href = claimUrl(); return; }
-        goBtn.disabled = false; goBtn.textContent = "🔑 Get Key (24 jam)";
+        goBtn.disabled = false; goBtn.textContent = "🔑 Get Key (12 jam)";
       })
-      .catch(function(){ goBtn.disabled = false; goBtn.textContent = "🔑 Get Key (24 jam)"; });
+      .catch(function(){ goBtn.disabled = false; goBtn.textContent = "🔑 Get Key (12 jam)"; });
   })();
 
   var going=false;
@@ -119,7 +119,7 @@
     if(going || this.disabled) return;
     going=true; this.disabled=true; this.textContent="Membuka…";
     fetchLootUrl().then(function(url){
-      if(!url){ going=false; goBtn.disabled=false; goBtn.textContent="🔑 Get Key (24 jam)"; return; }
+      if(!url){ going=false; goBtn.disabled=false; goBtn.textContent="🔑 Get Key (12 jam)"; return; }
       window.location.href = url;
     });
   });
